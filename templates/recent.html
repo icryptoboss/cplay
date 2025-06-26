@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recent Videos & Playlists</title>
+    <style>
+      body {
+        background: #0f172a;
+        color: #fff;
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      h2 {
+        margin-top: 40px;
+        color: #38bdf8;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      .card:hover {
+        background: #334155;
+      }
+      .emoji {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+      }
+      a {
+        text-decoration: none;
+        color: inherit;
+      }
+      .filename {
+        font-size: 0.9rem;
+        color: #94a3b8;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>📺 Recent Activity</h1>
+
+    <h2>🕘 Recently Played Videos</h2>
+    <div class="grid">
+      {% for item in recent %}
+      <a
+        href="/player?url={{ item.url | urlencode }}&title={{ item.title | urlencode }}"
+      >
+        <div class="card">
+          <div class="emoji">{{ item.emoji }}</div>
+          <div>{{ item.title }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <h2>📂 Uploaded Playlists</h2>
+    <div class="grid">
+      {% for txt in txt_files %}
+      <a href="/playlist/{{ txt }}">
+        <div class="card">
+          <div class="emoji">📂</div>
+          <div class="filename">{{ txt.replace('.txt', '') }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </body>
+</html>

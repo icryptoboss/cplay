@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Classplus Player</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #0f172a;
+        color: #fff;
+        margin: 0;
+        padding: 30px 15px;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: auto;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        padding: 12px;
+        margin-top: 10px;
+        margin-bottom: 20px;
+        border: none;
+        border-radius: 8px;
+        background: #334155;
+        color: white;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        background: #2563eb;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: #1d4ed8;
+      }
+
+      form {
+        margin-bottom: 30px;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 16px;
+        margin-bottom: 40px;
+      }
+
+      .card {
+        background: #1e293b;
+        border-radius: 10px;
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: background 0.2s;
+        text-decoration: none;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .card:hover {
+        background: #334155;
+      }
+
+      .emoji {
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+
+      .title {
+        font-size: 0.95rem;
+        word-wrap: break-word;
+      }
+
+      .section-title {
+        font-size: 1.2rem;
+        margin: 25px 0 10px;
+        border-bottom: 1px solid #475569;
+        padding-bottom: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>🎥 Classplus Video Player</h2>
+
+      <!-- 🎯 URL Input Form -->
+      <form onsubmit="handleUrlSubmit(event)">
+        <input
+          type="text"
+          id="url"
+          placeholder="Paste your non drm .m3u8 link here"
+          required
+        />
+        <input type="checkbox" id="encrypt" checked hidden />
+        <button type="submit">▶️ Play Video</button>
+      </form>
+
+      <!-- 📂 TXT Playlist Upload -->
+      <form
+        action="/upload_playlist"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <input type="file" name="playlist_file" accept=".txt" required />
+        <button type="submit">📄 Upload Playlist</button>
+      </form>
+
+      <!-- 🔁 Recently Played Videos -->
+      {% if recent_videos %}
+      <div class="section-title">🔁 Recently Played</div>
+      <div class="grid">
+        {% for item in recent_videos %}
+        <a
+          class="card"
+          href="/player?url={{ item.url | urlencode }}&encrypted=false&title={{ item.title | urlencode }}"
+        >
+          <div class="emoji">{{ item.emoji }}</div>
+          <div class="title">{{ item.title }}</div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- 📂 Uploaded Playlists -->
+      {% if txt_playlists %}
+      <div class="section-title">📂 Uploaded Playlists</div>
+      <div class="grid">
+        {% for txt in txt_playlists %}
+        <a class="card" href="/playlist/{{ txt }}">
+          <div class="emoji">📄</div>
+          <div class="title">{{ txt.replace('.txt', '') }}</div>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <div style="text-align: center; margin-top: 20px">
+        <a href="/recent" style="color: #38bdf8">🔍 View Full History</a>
+      </div>
+    </div>
+
+    <script>
+      function handleUrlSubmit(e) {
+        e.preventDefault();
+        const rawUrl = document.getElementById("url").value.trim();
+        const encrypted = document.getElementById("encrypt").checked;
+        let url = rawUrl;
+
+        if (encrypted) {
+          url = btoa(rawUrl);
+        }
+
+        const playerUrl = `/player?url=${encodeURIComponent(
+          url
+        )}&encrypted=${encrypted}`;
+        window.location.href = playerUrl;
+      }
+    </script>
+  </body>
+</html>

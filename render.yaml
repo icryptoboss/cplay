@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: cplayer
+    runtime: python
+    buildCommand: ""
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_ENV
+        value: production
+    plan: free

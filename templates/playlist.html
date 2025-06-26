@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>📜 Playlist </title>
+    <style>
+      body {
+        background-color: #0f172a;
+        color: #ffffff;
+        font-family: "Segoe UI", sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .playlist {
+        max-width: 600px;
+        margin: auto;
+        background: #1e293b;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #334155;
+        border-radius: 8px;
+      }
+
+      .item-title {
+        font-size: 16px;
+        flex: 1;
+        margin-right: 15px;
+      }
+
+      .btn-play {
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+
+      .btn-play:hover {
+        background-color: #1d4ed8;
+      }
+
+      .btn-disabled {
+        background-color: #dc2626;
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: not-allowed;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>🎵 My Playlist</h2>
+
+    <div class="playlist">
+      {% for entry in entries %}
+      <div class="item">
+        <div class="item-title">{{ entry.title }}</div>
+        {% if "/drm/" in entry.url %}
+        <button class="btn-disabled" disabled>🚫 Can't Play This</button>
+        {% else %}
+        <button class="btn-play" onclick="playVideo('{{ entry.url }}')">
+          ▶️ Play
+        </button>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <script>
+      function playVideo(rawUrl) {
+        const encoded = btoa(rawUrl);
+        const redirectUrl = `/player?url=${encodeURIComponent(
+          encoded
+        )}&encrypted=true`;
+        window.location.href = redirectUrl;
+      }
+    </script>
+  </body>
+</html>

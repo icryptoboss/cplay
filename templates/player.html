@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Video Player</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+    <style>
+      body {
+        background-color: #0f172a;
+        font-family: "Segoe UI", sans-serif;
+        color: #f8fafc;
+        margin: 0;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+        font-weight: bold;
+        word-break: break-word;
+      }
+
+      .video-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 960px;
+        aspect-ratio: 16 / 9;
+        margin-bottom: 1.5rem;
+      }
+
+      video {
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        overflow: hidden;
+      }
+
+      @media (max-width: 600px) {
+        h1 {
+          font-size: 1.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="videoTitle">Loading...</h1>
+
+    <div class="video-wrapper">
+      <video id="video" controls playsinline></video>
+    </div>
+
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedUrl = urlParams.get("url");
+      const isEncrypted = urlParams.get("encrypted") === "true";
+      const titleParam = urlParams.get("title");
+      const titleElem = document.getElementById("videoTitle");
+
+      // 🏷️ Display Title from Playlist or Fallback
+      if (titleParam) {
+        titleElem.textContent = decodeURIComponent(titleParam);
+      } else if (encodedUrl) {
+        try {
+          let rawUrl = encodedUrl;
+          if (isEncrypted) {
+            rawUrl = atob(encodedUrl);
+          }
+          const parts = rawUrl.split("/");
+          titleElem.textContent = parts[parts.length - 2] || "Untitled Video";
+        } catch (e) {
+          titleElem.textContent = "Untitled Video";
+        }
+      } else {
+        titleElem.textContent = "Untitled Video";
+      }
+
+      // 🎬 Load & Play Video
+      if (!encodedUrl) {
+        alert("No video URL provided");
+      } else {
+        const apiUrl = `/get/cp?url=${encodeURIComponent(
+          encodedUrl
+        )}&encrypted=${isEncrypted}`;
+        fetch(apiUrl)
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.status && data.url) {
+              const video = document.getElementById("video");
+              const videoUrl = data.url;
+              const videoKey = "resume_" + videoUrl;
+
+              if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(videoUrl);
+                hls.attachMedia(video);
+              } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+                video.src = videoUrl;
+              }
+
+              new Plyr(video);
+
+              // ⏱️ Resume Playback
+              const savedTime = localStorage.getItem(videoKey);
+              if (savedTime) {
+                video.currentTime = parseFloat(savedTime);
+              }
+
+              video.addEventListener("timeupdate", () => {
+                if (
+                  !video.duration ||
+                  video.currentTime >= video.duration * 0.95
+                ) {
+                  localStorage.removeItem(videoKey);
+                } else {
+                  localStorage.setItem(videoKey, video.currentTime);
+                }
+              });
+
+              video.addEventListener("ended", () => {
+                localStorage.removeItem(videoKey);
+              });
+            } else {
+              alert("Failed to load video: " + data.message);
+            }
+          })
+          .catch((err) => {
+            console.error(err);
+            alert("Error loading video.");
+          });
+      }
+    </script>
+  </body>
+</html>
