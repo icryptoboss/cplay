@@ -18,6 +18,7 @@ CLASSPLUS_DOMAINS = [
 ]
 SIGNING_APIS = [
     "https://ugxclassplusapi.vercel.app/get/cp?url="
+
 ]
 
 UPLOAD_FOLDER = "uploads"
@@ -99,18 +100,28 @@ def home():
 
 @app.route("/recent")
 def recent():
+    import json
     try:
-        with open(RECENT_FILE, "r", encoding="utf-8") as f:
-            recent = json.load(f)
+        with open("recent.json", "r", encoding="utf-8") as f:
+            recent_data = json.load(f)
     except:
-        recent = []
+        recent_data = []
 
-    for item in recent:
+    # Add random emoji to each item if not already present
+    import random
+    emojis = ['🎬', '🎥', '📹', '🍿', '🖥️', '📼', '💿', '🎞️', '📺', '▶️']
+    for item in recent_data:
         if "emoji" not in item:
-            item["emoji"] = EMOJIS[hash(item["url"]) % len(EMOJIS)]
+            item["emoji"] = random.choice(emojis)
 
-    txt_files = [f for f in os.listdir(UPLOAD_FOLDER) if f.endswith(".txt")]
-    return render_template("recent.html", recent_videos=recent, txt_playlists=txt_files)
+    # List uploaded .txt files
+    txt_dir = os.path.join("uploads")
+    try:
+        txt_files = [f for f in os.listdir(txt_dir) if f.endswith(".txt")]
+    except:
+        txt_files = []
+
+    return render_template("recent.html", recent=recent_data, txt_files=txt_files)
 
 @app.route("/get/cp")
 def get_cp():
