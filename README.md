@@ -2,6 +2,11 @@
 
 [![CPlay on Koyeb](https://img.shields.io/badge/Koyeb-Live-green?logo=koyeb)](https://cplay.koyeb.app)
 
+### 🚀 Live Deployments
+
+- 🌐 [CPlay on Render](https://cplay.onrender.com)
+- ☁️ [CPlay on Koyeb](https://cplay.koyeb.app)
+
 <h1 align="center">🎬 CPlay — Seamless Streaming, Smart Playlists</h1>
 
 <p align="center">
